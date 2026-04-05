@@ -1,0 +1,15 @@
+{
+  "name": "global-company-mcp",
+  "version": "1.0.0",
+  "description": "MCP server aggregating freshly registered companies from global registries — Companies House UK, SEC EDGAR USA, MCA India, OpenCorporates",
+  "private": true,
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "build": "npm run build --workspace=packages/mcp-server",
+    "dev": "npm run dev --workspace=packages/mcp-server",
+    "test": "npm run test --workspace=packages/mcp-server",
+    "db:push": "npm run db:push --workspace=packages/mcp-server",
+    "db:studio": "npm run db:studio --workspace=packages/mcp-server"
+  },
+  "engines": { "node": ">=18.0.0" }
+}

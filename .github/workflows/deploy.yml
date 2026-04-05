@@ -1,0 +1,111 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:   # Also allow manual trigger from GitHub UI
+
+jobs:
+  deploy:
+    name: Deploy MCP Server
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      # ── 1. Checkout ──────────────────────────────────────────────────────────
+      - uses: actions/checkout@v4
+
+      # ── 2. Build locally to catch errors before deploying ────────────────────
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install & build
+        run: |
+          npm ci
+          npm run build
+
+      # ── 3. Bundle Lambda zip ─────────────────────────────────────────────────
+      - name: Package Lambda scheduler
+        run: |
+          cd infra/lambda
+          zip -j scheduler.zip scheduler.mjs
+          echo "Lambda zip created"
+
+      # ── 4. Deploy app to EC2 via SSH ─────────────────────────────────────────
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host:     ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key:      ${{ secrets.EC2_SSH_KEY }}
+          timeout:  120s
+          script: |
+            set -e
+
+            # Pull latest code
+            cd ~/app || git clone ${{ github.server_url }}/${{ github.repository }}.git ~/app
+            cd ~/app
+            git fetch origin main
+            git reset --hard origin/main
+
+            # Install prod dependencies
+            npm ci --omit=dev
+
+            # Build TypeScript
+            npm run build
+
+            # Write .env from GitHub Secrets
+            cat > ~/app/packages/mcp-server/.env << 'ENVEOF'
+            NODE_ENV=production
+            PORT=3000
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
+            API_KEY=${{ secrets.API_KEY }}
+            INTERNAL_KEY=${{ secrets.INTERNAL_KEY }}
+            CH_API_KEY=${{ secrets.CH_API_KEY }}
+            CONTACT_EMAIL=${{ secrets.CONTACT_EMAIL }}
+            APIFY_TOKEN=${{ secrets.APIFY_TOKEN }}
+            MCA_ACTOR_ID=${{ secrets.MCA_ACTOR_ID }}
+            OPENCORP_API_KEY=${{ secrets.OPENCORP_API_KEY }}
+            AWS_REGION=${{ secrets.AWS_REGION }}
+            S3_BUCKET=${{ secrets.S3_BUCKET }}
+            DATA_GOV_API_KEY=${{ secrets.DATA_GOV_API_KEY }}
+            ENVEOF
+
+            # Reload PM2
+            cd ~/app
+            pm2 describe mcp-server > /dev/null 2>&1 \
+              && pm2 reload mcp-server --update-env \
+              || pm2 start packages/mcp-server/dist/index.js \
+                   --name mcp-server \
+                   --cwd ~/app/packages/mcp-server \
+                   --log ~/logs/mcp-server.log \
+                   --time \
+                   --restart-delay=3000 \
+                   --max-restarts=10
+
+            pm2 save
+
+            # Health check
+            sleep 3
+            curl -sf http://localhost:3000/health && echo "Health check passed" || exit 1
+
+      # ── 5. Update Lambda with new scheduler zip ───────────────────────────────
+      - name: Update Lambda scheduler
+        env:
+          AWS_ACCESS_KEY_ID:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION:            ${{ secrets.AWS_REGION }}
+        run: |
+          aws lambda update-function-code \
+            --function-name global-company-mcp-scheduler \
+            --zip-file fileb://infra/lambda/scheduler.zip \
+            --region $AWS_REGION
+          echo "Lambda updated"
+
+      # ── 6. Notify success ─────────────────────────────────────────────────────
+      - name: Deployment summary
+        run: |
+          echo "Deployed commit ${{ github.sha }} to EC2"
+          echo "MCP endpoint: http://${{ secrets.EC2_HOST }}:3000/mcp"

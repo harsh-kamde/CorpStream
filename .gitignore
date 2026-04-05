@@ -1,0 +1,33 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+
+# Terraform state — contains secrets, never commit
+infra/terraform/terraform.tfvars
+infra/terraform/.terraform/
+infra/terraform/*.tfstate
+infra/terraform/*.tfstate.*
+infra/terraform/*.tfplan
+infra/terraform/.terraform.lock.hcl
+
+# Lambda build artifacts
+infra/lambda/scheduler.zip
+
+# OS
+.DS_Store
+*.swp
+*.swo
+
+# IDE
+.idea/
+.vscode/
+*.code-workspace
+
+# Logs
+*.log
+logs/
+
+# TypeScript
+*.tsbuildinfo

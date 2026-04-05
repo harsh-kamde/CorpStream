@@ -1,0 +1,16 @@
+# Copy this to terraform.tfvars and fill in your values
+# NEVER commit terraform.tfvars to Git (it's in .gitignore)
+
+project_name   = "global-company-mcp"
+aws_region     = "ap-south-1"
+
+# Get your public key: cat ~/.ssh/id_rsa.pub
+ssh_public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAB..."
+
+db_username    = "mcpuser"
+db_password    = "YourStrongPassword123!"   # min 8 chars
+
+internal_key   = "generate-with-openssl-rand-hex-32"
+
+# Optional — get email if you approach AWS charges
+alert_email    = "your@email.com"

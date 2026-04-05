@@ -1,0 +1,37 @@
+{
+  "title": "MCA India Scraper Input",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "startDate": {
+      "title": "Start date",
+      "type": "string",
+      "description": "Fetch companies incorporated on or after this date (YYYY-MM-DD)",
+      "example": "2024-07-01",
+      "editor": "textfield"
+    },
+    "endDate": {
+      "title": "End date",
+      "type": "string",
+      "description": "Fetch companies incorporated on or before this date (YYYY-MM-DD)",
+      "example": "2024-07-02",
+      "editor": "textfield"
+    },
+    "maxResults": {
+      "title": "Max results",
+      "type": "integer",
+      "description": "Maximum number of companies to scrape",
+      "default": 100,
+      "minimum": 1,
+      "maximum": 1000,
+      "editor": "number"
+    },
+    "proxyConfig": {
+      "title": "Proxy configuration",
+      "type": "object",
+      "description": "Use Apify proxy to avoid IP blocks",
+      "default": { "useApifyProxy": true },
+      "editor": "proxy"
+    }
+  }
+}

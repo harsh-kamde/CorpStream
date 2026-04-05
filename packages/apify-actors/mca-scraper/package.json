@@ -1,0 +1,16 @@
+{
+  "name": "mca-india-scraper",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Scrapes newly registered companies from MCA India portal",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "node src/main.js",
+    "deploy": "apify push"
+  },
+  "dependencies": {
+    "apify": "^3.2.2",
+    "crawlee": "^3.10.1",
+    "puppeteer": "^22.15.0"
+  }
+}
