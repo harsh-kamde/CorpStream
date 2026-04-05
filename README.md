@@ -2,10 +2,6 @@
 
 > An MCP (Model Context Protocol) server that aggregates **freshly registered companies** from 4+ global registries daily — Companies House UK, SEC EDGAR USA, MCA India, and OpenCorporates. Query everything through Claude or Cursor IDE using natural language.
 
-**Stack:** Node.js · TypeScript · PostgreSQL (AWS RDS) · AWS Lambda · Apify  
-**Cost:** $0 — runs entirely on AWS free tier + free API tiers  
-**Deployment:** EC2 t2.micro + RDS t3.micro + Lambda (all free tier)
-
 ---
 
 ## What you can ask (via Cursor or Claude)
@@ -43,6 +39,11 @@
 | `listRuns` | Audit log of all scrape runs |
 
 ---
+
+**Stack:** Node.js · TypeScript · PostgreSQL (AWS RDS) · AWS Lambda · Apify  
+**Cost:** $0 — runs entirely on AWS free tier + free API tiers  
+**Deployment:** EC2 t2.micro + RDS t3.micro + Lambda (all free tier)
+
 
 ## Architecture
 
