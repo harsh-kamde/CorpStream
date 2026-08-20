@@ -1,4 +1,4 @@
-# CorpStream: Global Company Intelligence MCP Server 
+# CorpStream: Global Company Intelligence MCP Server  
 
 > An MCP (Model Context Protocol) server that aggregates **freshly registered companies** from 4+ global registries daily — Companies House UK, SEC EDGAR USA, MCA India, and OpenCorporates. Query everything through Claude or Cursor IDE using natural language.
 
